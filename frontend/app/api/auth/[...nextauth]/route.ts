@@ -1,8 +1,9 @@
 import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import prisma from "@/app/db";
+import { Keypair } from "@solana/web3.js"; 
 
-
+ 
 
 const handler = NextAuth({
     providers : [
@@ -18,7 +19,7 @@ const handler = NextAuth({
             if(!email){
                 return false
             }
-            const userIn = prisma.user.findFirst({
+            const userIn =await prisma.user.findFirst({
                 where : {
                     username : email
                 }
@@ -27,6 +28,13 @@ const handler = NextAuth({
             if(userIn){
                 return true
             }
+            const keypair = Keypair.generate();
+            const publickey = keypair.publicKey.toBase58();
+            const privateKey = keypair.secretKey;
+
+            console.log(publickey);
+            console.log(privateKey);
+
 
             await prisma.user.create({
                 data : {
@@ -34,8 +42,8 @@ const handler = NextAuth({
                     provider: "Github",
                     solWallet : {
                         create : {
-                           publicKey : "",
-                           privateKey : "",
+                           publickey : publickey,
+                           privateKey : privateKey.toString()
                         }
                     },
                     inrWallet : {
@@ -45,6 +53,7 @@ const handler = NextAuth({
                     }
                 }
             })
+            return true
         }
         return false
         }}
