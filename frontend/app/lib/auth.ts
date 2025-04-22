@@ -13,6 +13,10 @@ export interface CustomSession extends Session {
 }
 
 export const authConfig = {
+    secret : process.env.NEXTAUTH_SECRET || 'secret',
+    session: {
+        strategy: "jwt",
+      },
     providers: [
         GithubProvider({
             clientId: process.env.GITHUB_CLIENT_ID ?? "",
@@ -34,7 +38,7 @@ export const authConfig = {
             if (account?.providerAccountId) {
                 const user = await prisma.user.findFirst({
                     where: {
-                        sub: account.providerAccountId
+                        sub: account?.providerAccountId
                     }
                 });
                 if (user) {
@@ -43,7 +47,7 @@ export const authConfig = {
             }
             return token;
         },
-        async signIn({ user, account, profile }) {
+        async signIn({ user, account, profile ,email, credentials } : any) {
             if (account?.provider === 'github') {
                 const userEmail = user.email;
                 if (!userEmail) return false;
@@ -67,8 +71,8 @@ export const authConfig = {
                         sub: account.providerAccountId,
                         solWallet: {
                             create: {
-                                publickey,
-                                privateKey
+                                publickey : publickey,
+                                privateKey : privateKey
                             }
                         },
                         inrWallet: {

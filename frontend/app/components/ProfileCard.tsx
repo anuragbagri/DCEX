@@ -1,6 +1,8 @@
 "use client"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { PrimaryButton } from "./Button";
+import { useEffect, useState } from "react";
 
 export const ProfileCard = ({publicKey} : {
     publicKey : string
@@ -37,9 +39,37 @@ function Assets({publicKey} : {
    publicKey : string
 })
 {
+    const [copy , setCopy] = useState(false);
+
+    useEffect(()=> {
+      if(copy){
+        let  timeout = setTimeout(()=> {
+        setCopy(false)
+      },  3000)
+
+      return ()=> {
+        clearTimeout(timeout)
+      }
+    }
+    }, [copy])
+
+
     return (
         <div className="text-slate-500 mt-4">
-            Accounts assets
+            Accounts Assets
+            <br/>
+
+            <div className="flex justify-between">
+                <div>
+                   
+                </div>
+                <div>
+                 <PrimaryButton onClick={()=>{
+                    navigator.clipboard.writeText(publicKey)
+                  setCopy(true)
+                 }}>{copy ? "copied" : "your wallet address"}</PrimaryButton>
+                </div>
+            </div>
         </div>
     )
 }
